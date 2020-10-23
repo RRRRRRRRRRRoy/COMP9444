@@ -38,12 +38,27 @@ class NetLin(nn.Module):
         final_output = self.logSoftMax(layer1_output)
         return final_output # CHANGE CODE HERE
 
+
+#########################################################################################################
+# Part1 Question2
+# In the second question, we should design a 2 layes nerual network.
+# hidden node -----> tanh -----> nn.Tanh()
+# Page 6 Source: https://www.cse.unsw.edu.au/~cs9444/20T3/lect/1page/2b_Pytorch.pdf
+# output node -----> log softmax -----> nn.LogSoftmax
+# Page 12 Source: https://www.cse.unsw.edu.au/~cs9444/20T3/lect/1page/2b_Pytorch.pdf
+# Can also use the container nn.sequential to set up this nerual network
+# Source: https://stackoverflow.com/questions/59916814/how-to-create-a-pytorch-nn-with-2-hidden-layer-with-nn-sequential/59916948#59916948
+#########################################################################################################
 class NetFull(nn.Module):
     # two fully connected tanh layers followed by log softmax
     def __init__(self):
         super(NetFull, self).__init__()
-        # INSERT CODE HERE
-
+        hidden_nodes_num = 100
+        self.layer1 = torch.nn.Linear 
+        self.layer2 = 
+        
+        model = 
+        
     def forward(self, x):
         # INSERT CODE HERE
         return 0 # CHANGE CODE HERE
