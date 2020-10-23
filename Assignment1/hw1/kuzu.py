@@ -13,6 +13,7 @@ class NetLin(nn.Module):
         # INSERT CODE HERE
 
     def forward(self, x):
+        # INSERT CODE HERE
         return 0 # CHANGE CODE HERE
 
 class NetFull(nn.Module):
@@ -22,6 +23,7 @@ class NetFull(nn.Module):
         # INSERT CODE HERE
 
     def forward(self, x):
+        # INSERT CODE HERE
         return 0 # CHANGE CODE HERE
 
 class NetConv(nn.Module):
@@ -32,4 +34,5 @@ class NetConv(nn.Module):
         # INSERT CODE HERE
 
     def forward(self, x):
+        # INSERT CODE HERE
         return 0 # CHANGE CODE HERE

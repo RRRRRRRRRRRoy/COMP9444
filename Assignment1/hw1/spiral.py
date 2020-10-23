@@ -11,6 +11,7 @@ class PolarNet(torch.nn.Module):
         # INSERT CODE HERE
 
     def forward(self, input):
+        # INSERT CODE HERE
         output = 0*input[:,0] # CHANGE CODE HERE
         return output
 
@@ -20,6 +21,7 @@ class RawNet(torch.nn.Module):
         # INSERT CODE HERE
 
     def forward(self, input):
+        # INSERT CODE HERE
         output = 0*input[:,0] # CHANGE CODE HERE
         return output
 
