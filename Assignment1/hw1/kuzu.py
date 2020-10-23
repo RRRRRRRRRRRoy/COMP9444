@@ -24,8 +24,9 @@ class NetLin(nn.Module):
         self.pic_size = pow(28,2)
         self.output_num = 10
         self.dimension = 1
+        # 
         self.layer1 = torch.nn.Linear(self.pic_size,self.output_num)
-        self.logSoftMax = torch.nn.LogSoftmax(self.dimension)
+        self.logSoftMax = torch.nn.LogSoftmax(dim = self.dimension)
 
     def forward(self, x):
         # INSERT CODE HERE
@@ -53,15 +54,36 @@ class NetFull(nn.Module):
     # two fully connected tanh layers followed by log softmax
     def __init__(self):
         super(NetFull, self).__init__()
-        hidden_nodes_num = 100
-        self.layer1 = torch.nn.Linear 
-        self.layer2 = 
+        # picture size
+        self.pic_size = pow(28,2)
+        # number of output
+        self.output_num = 10
+        self.dimension = 1
+        # changing hidden_nodes_num can increase the accuracy
+        # 100   -----> 84%
+        # 1000  -----> 85% -----> the best
+        # 10000 -----> 83%
+        hidden_nodes_num = 1000
+
+        # Setting the Neural Network layer
+        self.layer1 = torch.nn.Linear(self.pic_size,hidden_nodes_num)
+        self.layer2 = torch.nn.Linear(hidden_nodes_num,self.output_num)
+        self.tanh = torch.nn.Tanh()
+        self.logSoftMax = torch.nn.LogSoftmax(dim=self.dimension)
         
-        model = 
-        
+        # using the Sequential to wrap up these layers
+        self.model = torch.nn.Sequential(
+            self.layer1,
+            self.tanh,
+            self.layer2,
+            self.logSoftMax
+        )
+
     def forward(self, x):
         # INSERT CODE HERE
-        return 0 # CHANGE CODE HERE
+        auto_start = -1
+        output = self.model(x.reshape([-1,self.pic_size]))
+        return output # CHANGE CODE HERE
 
 class NetConv(nn.Module):
     # two convolutional layers and one fully connected layer,
