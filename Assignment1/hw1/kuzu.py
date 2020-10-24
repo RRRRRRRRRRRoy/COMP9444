@@ -85,13 +85,46 @@ class NetFull(nn.Module):
         output = self.model(x.reshape([-1,self.pic_size]))
         return output # CHANGE CODE HERE
 
+#########################################################################################################
+# 
+# 
+# How to use conv2d in pytorch?
+# Source: https://pytorch.org/docs/stable/generated/torch.nn.Conv2d.html#torch.nn.Conv2d
+#########################################################################################################
 class NetConv(nn.Module):
     # two convolutional layers and one fully connected layer,
     # all using relu, followed by log_softmax
     def __init__(self):
         super(NetConv, self).__init__()
-        # INSERT CODE HERE
+        self.dimension = 1
+        self.lim_size = 49 * 6 * 6
+        self.convolutional_layer1 = torch.nn.Conv2d(1,98,3,1,1)
+        self.convolutional_layer2 = torch.nn.Conv2d(98,49,3,1,1)
+        self.maxpool = torch.nn.MaxPool2d(3,2)
+        self.linear_layer = torch.nn.Linear(self.lim_size, 1000)
+        self.relu = torch.nn.ReLU()
+        self.logsoftmax = torch.nn.LogSoftmax(dim=self.dimension)
+
+        self.conv_model1 = torch.nn.Sequential(
+            self.convolutional_layer1,
+            self.relu,
+            self.maxpool
+        )
+
+        self.conv_model2 = torch.nn.Sequential(
+            self.convolutional_layer2,
+            self.relu,
+            self.maxpool
+        )
+
 
     def forward(self, x):
-        # INSERT CODE HERE
-        return 0 # CHANGE CODE HERE
+        model1_output = self.conv_model1(x)
+        model2_output = self.conv_model2(model1_output)
+        
+        auto_start = -1
+        conv_output = model2_output.reshape([auto_start,self.lim_size])
+        
+        linear_output = self.linear_layer(conv_output)
+        final_output = self.logsoftmax(linear_output)
+        return final_output # CHANGE CODE HERE
