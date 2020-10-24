@@ -56,7 +56,7 @@ class PolarNet(torch.nn.Module):
         output_model1 = self.model1(input)
         
         # Answer of Q5
-        self.Q5Result = output_model1
+        self.h1 = output_model1
 
         final_output = self.model2(output_model1)
 
@@ -100,10 +100,39 @@ class RawNet(torch.nn.Module):
         output_model2 = self.model2_rawNet(output_model1)
         self.h2 = output_model2
         final_output = self.model3_rawNet(output_model2)
+        
+        # seconde way writing this code
+        # input = self.layer1(input)
+        # input = self.tanh(input)
+        # self.h1 = input
+        # input = self.layer2(input)
+        # input = self.tanh(input)
+        # self.h2 = input
+        # input = self.layer3(input)
+        # final_output = self.sigmoid(input)
 
         # CHANGE CODE HERE
         return final_output
 
 def graph_hidden(net, layer, node):
-    plt.clf()
     # INSERT CODE HERE
+    xrange = torch.arange(start=-7,end=7.1,step=0.01,dtype=torch.float32)
+    yrange = torch.arange(start=-6.6,end=6.7,step=0.01,dtype=torch.float32)
+    xcoord = xrange.repeat(yrange.size()[0])
+    ycoord = torch.repeat_interleave(yrange, xrange.size()[0], dim=0)
+    grid = torch.cat((xcoord.unsqueeze(1),ycoord.unsqueeze(1)),1)
+
+    with torch.no_grad(): # suppress updating of gradients
+        net.eval()        # toggle batch norm, dropout
+        output = net(grid)
+        net.train() # toggle batch norm, dropout back again
+        if(layer == 1):
+            mid_layer = net.h1
+        elif(layer == 2):
+            mid_layer = net.h2
+        mid_layer_2_filtered = mid_layer[:,node]
+        pred = (mid_layer_2_filtered >= 0).float()
+
+        # plot function computed by model
+        plt.clf()
+        plt.pcolormesh(xrange,yrange,pred.cpu().view(yrange.size()[0],xrange.size()[0]), cmap='Wistia')
