@@ -123,7 +123,8 @@ def check_number_layer(net, layer):
 
 def graph_hidden(net, layer, node):
     # INSERT CODE HERE
-    # These code is modified from graph_output.py
+    # These code is modified from graph_output
+    # Source: spiral_main.py
     xrange = torch.arange(start=-7,end=7.1,step=0.01,dtype=torch.float32)
     yrange = torch.arange(start=-6.6,end=6.7,step=0.01,dtype=torch.float32)
     xcoord = xrange.repeat(yrange.size()[0])
@@ -134,10 +135,14 @@ def graph_hidden(net, layer, node):
         net.eval()        # toggle batch norm, dropout
         output = net(grid)
         net.train() # toggle batch norm, dropout back again
+        # get the number of the layers
         mid_layer = check_number_layer(net, layer)
         mid_layer_2_filtered = mid_layer[:,node]
+        # Whether checking is because of the codomain of Tanh and sigmoid
+        # we need to do the filting
         pred = (mid_layer_2_filtered >= 0).float()
 
         # plot function computed by model
+        # same come with graph_output
         plt.clf()
         plt.pcolormesh(xrange,yrange,pred.cpu().view(yrange.size()[0],xrange.size()[0]), cmap='Wistia')

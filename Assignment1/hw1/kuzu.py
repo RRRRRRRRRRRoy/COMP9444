@@ -105,12 +105,15 @@ class NetConv(nn.Module):
         self.relu = torch.nn.ReLU()
         self.logsoftmax = torch.nn.LogSoftmax(dim=self.dimension)
 
+        # Can also combine them into one model
+        # Using the sequential function to wrap them up
         self.conv_model1 = torch.nn.Sequential(
             self.convolutional_layer1,
             self.relu,
             self.maxpool
         )
 
+        # Using the sequential function to wrap them up
         self.conv_model2 = torch.nn.Sequential(
             self.convolutional_layer2,
             self.relu,
