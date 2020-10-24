@@ -60,9 +60,9 @@ class NetFull(nn.Module):
         self.output_num = 10
         self.dimension = 1
         # changing hidden_nodes_num can increase the accuracy
-        # 100   -----> 84%
-        # 1000  -----> 85% -----> the best
-        # 10000 -----> 83%
+        # 100   -----> 8371 84%
+        # 1000  -----> 8438 84% - 85% -----> the best
+        # 10000 -----> 8382 83%
         hidden_nodes_num = 1000
 
         # Setting the Neural Network layer
@@ -82,12 +82,12 @@ class NetFull(nn.Module):
     def forward(self, x):
         # INSERT CODE HERE
         auto_start = -1
-        output = self.model(x.reshape([-1,self.pic_size]))
+        output = self.model(x.reshape([auto_start,self.pic_size]))
         return output # CHANGE CODE HERE
 
 #########################################################################################################
-# 
-# 
+# How to change the parameter in the maxpool to improve the accuracy
+# https://stackoverflow.com/questions/54788554/deep-conv-model-number-of-parameters
 # How to use conv2d in pytorch?
 # Source: https://pytorch.org/docs/stable/generated/torch.nn.Conv2d.html#torch.nn.Conv2d
 #########################################################################################################
@@ -101,7 +101,7 @@ class NetConv(nn.Module):
         self.convolutional_layer1 = torch.nn.Conv2d(1,98,3,1,1)
         self.convolutional_layer2 = torch.nn.Conv2d(98,49,3,1,1)
         self.maxpool = torch.nn.MaxPool2d(3,2)
-        self.linear_layer = torch.nn.Linear(self.lim_size, 1000)
+        self.linear_layer = torch.nn.Linear(self.lim_size, 100)
         self.relu = torch.nn.ReLU()
         self.logsoftmax = torch.nn.LogSoftmax(dim=self.dimension)
 
