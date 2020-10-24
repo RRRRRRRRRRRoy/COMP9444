@@ -21,9 +21,11 @@ class PolarNet(torch.nn.Module):
         self.sigmoid = torch.nn.Sigmoid()
 
         # using the Sequential to wrap up
-        self.model = torch.nn.Sequential(
+        self.model1 = torch.nn.Sequential(
             self.layer1,
-            self.tanh,
+            self.tanh
+        )
+        self.model2 = torch.nn.Sequential(
             self.layer2,
             self.sigmoid
         )
@@ -51,8 +53,14 @@ class PolarNet(torch.nn.Module):
         # How to use cat function?
         # Source: https://pytorch.org/docs/stable/generated/torch.cat.html
         input = torch.cat([r_vector,a_vector],dim = self.dimension)
-        output = self.model(input)
-        return output
+        output_model1 = self.model1(input)
+        
+        # Answer of Q5
+        self.Q5Result = output_model1
+
+        final_output = self.model2(output_model1)
+
+        return final_output
 
 class RawNet(torch.nn.Module):
     def __init__(self, num_hid):
@@ -71,11 +79,15 @@ class RawNet(torch.nn.Module):
         self.sigmoid = torch.nn.Sigmoid()
 
         # rawNet Model
-        self.model_rawNet = torch.nn.Sequential(
+        self.model1_rawNet = torch.nn.Sequential(
             self.layer1,
-            self.tanh,
+            self.tanh
+        )
+        self.model2_rawNet = torch.nn.Sequential(
             self.layer2,
-            self.tanh,
+            self.tanh
+        )
+        self.model3_rawNet = torch.nn.Sequential(
             self.layer3,
             self.sigmoid
         )
@@ -83,9 +95,14 @@ class RawNet(torch.nn.Module):
 
     def forward(self, input):
         # INSERT CODE HERE
-        output = self.model_rawNet(input)
+        output_model1 = self.model1_rawNet(input)
+        self.h1 = output_model1
+        output_model2 = self.model2_rawNet(output_model1)
+        self.h2 = output_model2
+        final_output = self.model3_rawNet(output_model2)
+
         # CHANGE CODE HERE
-        return output
+        return final_output
 
 def graph_hidden(net, layer, node):
     plt.clf()
