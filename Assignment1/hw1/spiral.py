@@ -58,10 +58,33 @@ class RawNet(torch.nn.Module):
     def __init__(self, num_hid):
         super(RawNet, self).__init__()
         # INSERT CODE HERE
+        # Part2 Question2
+        # Tip: the more hid_num, the faster converge
+        # Variables
+        self.input_size = 2
+        self.output_size = 1
+        # NN Layers
+        self.layer1 = torch.nn.Linear(2,num_hid)
+        self.layer2 = torch.nn.Linear(num_hid,num_hid)   
+        self.layer3 = torch.nn.Linear(num_hid,1)
+        self.tanh = torch.nn.Tanh()
+        self.sigmoid = torch.nn.Sigmoid()
+
+        # rawNet Model
+        self.model_rawNet = torch.nn.Sequential(
+            self.layer1,
+            self.tanh,
+            self.layer2,
+            self.tanh,
+            self.layer3,
+            self.sigmoid
+        )
+
 
     def forward(self, input):
         # INSERT CODE HERE
-        output = 0*input[:,0] # CHANGE CODE HERE
+        output = self.model_rawNet(input)
+        # CHANGE CODE HERE
         return output
 
 def graph_hidden(net, layer, node):
