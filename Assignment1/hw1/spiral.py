@@ -61,9 +61,9 @@ class PolarNet(torch.nn.Module):
         # change to vector
         # this code is based on the pseudocode of hw1.pdf
         # Source: https://www.cse.unsw.edu.au/~cs9444/20T3/hw1/index.html 
-        r = torch.sqrt(x*x+y*y)
+        r = torch.sqrt(pow(x,2)+pow(y,2))
         r_vector = r.reshape([-1,1])
-        a = torch.atan2(y,x).reshape([-1,1])
+        a = torch.atan2(y,x)
         a_vector = a.reshape([-1,1])
         
         # connect vector -----> cat function ----->  connect 2 vectors
@@ -130,6 +130,7 @@ class RawNet(torch.nn.Module):
         # The second middle layer
         self.h2 = output_model2
         final_output = self.model3_rawNet(output_model2)
+        
         # CHANGE CODE HERE
         return final_output
 
