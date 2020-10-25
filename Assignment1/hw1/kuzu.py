@@ -32,8 +32,8 @@ class NetLin(nn.Module):
         # INSERT CODE HERE
         # This part of code is for Part1 Question1
         auto_start = -1
-        to_shape = [auto_start,self.pic_size]
-        x = x.reshape(to_shape)
+        vector_shape = [auto_start,self.pic_size]
+        x = x.reshape(vector_shape)
 
         layer1_output = self.layer1(x)
         final_output = self.logSoftMax(layer1_output)
@@ -82,7 +82,8 @@ class NetFull(nn.Module):
     def forward(self, x):
         # INSERT CODE HERE
         auto_start = -1
-        output = self.model(x.reshape([auto_start,self.pic_size]))
+        vector_shape = [auto_start,self.pic_size]
+        output = self.model(x.reshape(vector_shape))
         return output # CHANGE CODE HERE
 
 #########################################################################################################
