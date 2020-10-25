@@ -24,19 +24,23 @@ class NetLin(nn.Module):
         self.pic_size = pow(28,2)
         self.output_num = 10
         self.dimension = 1
-        # 
+        # NN layer and activation function 
         self.layer1 = torch.nn.Linear(self.pic_size,self.output_num)
         self.logSoftMax = torch.nn.LogSoftmax(dim = self.dimension)
+
+        self.model = torch.nn.Sequential(
+            self.layer1,
+            self.logSoftMax
+        )
 
     def forward(self, x):
         # INSERT CODE HERE
         # This part of code is for Part1 Question1
         auto_start = -1
         vector_shape = [auto_start,self.pic_size]
-        x = x.reshape(vector_shape)
+        input_vector = x.reshape(vector_shape)
 
-        layer1_output = self.layer1(x)
-        final_output = self.logSoftMax(layer1_output)
+        final_output = self.model(input_vector)
         return final_output # CHANGE CODE HERE
 
 
