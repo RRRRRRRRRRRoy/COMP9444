@@ -60,11 +60,12 @@ class PolarNet(torch.nn.Module):
         
         # change to vector
         # this code is based on the pseudocode of hw1.pdf
-        # Source: https://www.cse.unsw.edu.au/~cs9444/20T3/hw1/index.html 
+        # Source: https://www.cse.unsw.edu.au/~cs9444/20T3/hw1/index.html
+        vecto_shape = [-1,1]
         r = torch.sqrt(pow(x,2)+pow(y,2))
-        r_vector = r.reshape([-1,1])
+        r_vector = r.reshape(vecto_shape)
         a = torch.atan2(y,x)
-        a_vector = a.reshape([-1,1])
+        a_vector = a.reshape(vecto_shape)
         
         # connect vector -----> cat function ----->  connect 2 vectors
         # How to use cat function?
@@ -96,9 +97,9 @@ class RawNet(torch.nn.Module):
         self.output_size = 1
         # NN Layers
         # Using 3 Linear Layers to initialize the rawNet
-        self.layer1 = torch.nn.Linear(2,num_hid)
+        self.layer1 = torch.nn.Linear(self.input_size,num_hid)
         self.layer2 = torch.nn.Linear(num_hid,num_hid)   
-        self.layer3 = torch.nn.Linear(num_hid,1)
+        self.layer3 = torch.nn.Linear(num_hid,self.output_size)
         self.tanh = torch.nn.Tanh()
         self.sigmoid = torch.nn.Sigmoid()
 
