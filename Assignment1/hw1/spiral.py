@@ -152,9 +152,19 @@ def graph_hidden(net, layer, node):
     # Source: https://www.cse.unsw.edu.au/~cs9444/20T3/hw1/hw1.zip
     xrange = torch.arange(start=-7,end=7.1,step=0.01,dtype=torch.float32)
     yrange = torch.arange(start=-6.6,end=6.7,step=0.01,dtype=torch.float32)
-    xcoord = xrange.repeat(yrange.size()[0])
-    ycoord = torch.repeat_interleave(yrange, xrange.size()[0], dim=0)
-    grid = torch.cat((xcoord.unsqueeze(1),ycoord.unsqueeze(1)),1)
+    yrange_first = yrange.size()[0]
+    xrange_first = xrange.size()[0]
+    dimenstion_output = 0
+    # Here is the detail of repeat function
+    # Source: https://pytorch.org/docs/stable/tensors.html
+    xcoord = xrange.repeat(yrange_first)
+    ycoord = torch.repeat_interleave(yrange, xrange_first, dim=dimenstion_output)
+    # reshape vector 
+    # Source: https://pytorch.org/docs/stable/generated/torch.unsqueeze.html
+    xcoord_column = xcoord.unsqueeze(1)
+    ycoord_column = ycoord.unsqueeze(1)
+    cat_coord = (xcoord_column,ycoord_column)
+    grid = torch.cat(cat_coord,1)
 
     with torch.no_grad(): # suppress updating of gradients
         net.eval()        # toggle batch norm, dropout
@@ -173,4 +183,4 @@ def graph_hidden(net, layer, node):
         # plot function computed by model
         # same come with graph_output which is is spiral_main.py
         plt.clf()
-        plt.pcolormesh(xrange,yrange,pred.cpu().view(yrange.size()[0],xrange.size()[0]), cmap='Wistia')
+        plt.pcolormesh(xrange,yrange,pred.cpu().view(yrange_first,xrange_first), cmap='Wistia')
