@@ -75,9 +75,7 @@ class PolarNet(torch.nn.Module):
         # Answer of Q5
         # Adding the mid layer to get the middle output
         self.h1 = output_model1
-
         final_output = self.model2(output_model1)
-
         return final_output
 
 #########################################################################################################
@@ -132,20 +130,6 @@ class RawNet(torch.nn.Module):
         # The second middle layer
         self.h2 = output_model2
         final_output = self.model3_rawNet(output_model2)
-        
-        # seconde way writing this code
-        # You can also write the code in this way
-        # This way is not good enough to do some changes
-
-        # input = self.layer1(input)
-        # input = self.tanh(input)
-        # self.h1 = input
-        # input = self.layer2(input)
-        # input = self.tanh(input)
-        # self.h2 = input
-        # input = self.layer3(input)
-        # final_output = self.sigmoid(input)
-
         # CHANGE CODE HERE
         return final_output
 
@@ -162,7 +146,8 @@ def check_number_layer(net, layer):
 def graph_hidden(net, layer, node):
     # INSERT CODE HERE
     # These code is modified from graph_output
-    # Source: spiral_main.py
+    # graph_output function in spiral_main.py  
+    # Source: https://www.cse.unsw.edu.au/~cs9444/20T3/hw1/hw1.zip
     xrange = torch.arange(start=-7,end=7.1,step=0.01,dtype=torch.float32)
     yrange = torch.arange(start=-6.6,end=6.7,step=0.01,dtype=torch.float32)
     xcoord = xrange.repeat(yrange.size()[0])
