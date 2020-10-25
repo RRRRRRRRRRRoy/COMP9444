@@ -96,10 +96,15 @@ class NetConv(nn.Module):
     # all using relu, followed by log_softmax
     def __init__(self):
         super(NetConv, self).__init__()
+        # Setting Constant variable
         self.dimension = 1
         self.lim_size = 49 * 6 * 6
+
+        # Define the layer of NN
         self.convolutional_layer1 = torch.nn.Conv2d(1,98,3,1,1)
         self.convolutional_layer2 = torch.nn.Conv2d(98,49,3,1,1)
+        # Max pool to improve the accuracy
+        # 3,2 -----> image overlap -----> more accurate
         self.maxpool = torch.nn.MaxPool2d(3,2)
         self.linear_layer = torch.nn.Linear(self.lim_size, 100)
         self.relu = torch.nn.ReLU()
@@ -122,12 +127,16 @@ class NetConv(nn.Module):
 
 
     def forward(self, x):
+        # Put input value in model1
         model1_output = self.conv_model1(x)
+        # Put the result from model1_output into model2
         model2_output = self.conv_model2(model1_output)
         
+        # the value of auto_start is -1, means the NN will start itself
         auto_start = -1
         conv_output = model2_output.reshape([auto_start,self.lim_size])
         
+        # Using the linear_layer and logsoftmax get the final result
         linear_output = self.linear_layer(conv_output)
         final_output = self.logsoftmax(linear_output)
         return final_output # CHANGE CODE HERE

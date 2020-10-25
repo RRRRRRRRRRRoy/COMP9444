@@ -3,6 +3,7 @@
 
 import torch
 
+# Start smaple
 star16 = torch.Tensor(
     [[1,1,0,0,0,0,0,0],
      [0,1,1,0,0,0,0,0],
@@ -23,6 +24,7 @@ star16 = torch.Tensor(
 
 # REPLACE heart18 WITH AN 18-by-14 TENSOR
 # TO REPRODUCE IMAGE SHOWN IN SPEC
+# This is the graph of heart
 heart18 = torch.Tensor(
     [[1, 1, 1, 1, 1, 1, 1, 1, 0, 0, 0, 0, 0, 0],
      [1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1],
@@ -46,6 +48,7 @@ heart18 = torch.Tensor(
 
 # REPLACE target1 WITH DATA TO PRODUCE
 # A NEW IMAGE OF YOUR OWN CREATION
+# The target 1 is an image of abstract unicorn
 target1 = torch.Tensor(
     [[1, 1, 1, 1, 1, 1, 1, 1, 0, 0, 0, 0, 0, 0],
      [1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1],
@@ -69,6 +72,7 @@ target1 = torch.Tensor(
 
 # REPLACE target2 WITH DATA TO PRODUCE
 # A NEW IMAGE OF YOUR OWN CREATION
+# Target is my own english name which is Roy
 target2 = torch.Tensor(
     [[1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 0, 0, 0, 0, 0, 0, 0, 0],
      [1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1],
@@ -107,7 +111,8 @@ target2 = torch.Tensor(
      [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 1, 1, 1, 1, 1, 1, 1]]
    )
 
-# NVDIA
+# This is the thrid designing 
+# Character Logo of NVDIA
 target3 = torch.Tensor(
  [[1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 0, 0, 0, 0, 0, 0],
     [1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 0, 0, 0, 1],

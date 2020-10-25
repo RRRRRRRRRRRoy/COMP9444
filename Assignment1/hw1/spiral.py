@@ -5,6 +5,16 @@ import torch
 import torch.nn as nn
 import matplotlib.pyplot as plt
 
+
+#########################################################################################################
+# In the Part 2 can set a lager hid_num and initial weight to speed up
+#########################################################################################################
+# Part 2 Question 1 and QUestion 2
+# The Boundry of PolarNet is the straight line
+# Using the straight line to cut the dot and get the final result
+# Using nn.cat function to connect 2 vectors
+#########################################################################################################
+
 class PolarNet(torch.nn.Module):
     def __init__(self, num_hid):
         super(PolarNet, self).__init__()
@@ -12,19 +22,24 @@ class PolarNet(torch.nn.Module):
         # Part2 Question1
         # The CNN part is same as Class Netfull -----> kuzu.py 
         self.dimension = 1
+        # the input size and output size
         self.input_size = 2
         self.output_size = 1
 
+        # 2 linear layers
+        # And 2 activation fuction
         self.layer1 = torch.nn.Linear(self.input_size,num_hid)
         self.layer2 = torch.nn.Linear(num_hid,self.output_size)
         self.tanh = torch.nn.Tanh()
         self.sigmoid = torch.nn.Sigmoid()
 
         # using the Sequential to wrap up
+        # model1 -----> layer1 and TanH
         self.model1 = torch.nn.Sequential(
             self.layer1,
             self.tanh
         )
+        # model2 ------> layer2 and sigmoid
         self.model2 = torch.nn.Sequential(
             self.layer2,
             self.sigmoid
@@ -44,6 +59,8 @@ class PolarNet(torch.nn.Module):
         # this can help us easy to do the calculation
         
         # change to vector
+        # this code is based on the pseudocode of hw1.pdf
+        # Source: https://www.cse.unsw.edu.au/~cs9444/20T3/hw1/index.html 
         r = torch.sqrt(x*x+y*y)
         r_vector = r.reshape([-1,1])
         a = torch.atan2(y,x).reshape([-1,1])
@@ -56,12 +73,20 @@ class PolarNet(torch.nn.Module):
         output_model1 = self.model1(input)
         
         # Answer of Q5
+        # Adding the mid layer to get the middle output
         self.h1 = output_model1
 
         final_output = self.model2(output_model1)
 
         return final_output
 
+#########################################################################################################
+# Part 2 Question 3 and QUestion 4
+# The Boundry of RawNet is the curve line
+# The reason of curve line is that the RawNet is try to overfit each dot in the graph
+# In this way, rawNet can get the final result -----> convergence
+# Therefore you can find some blue curve lines across the orange line
+#########################################################################################################
 class RawNet(torch.nn.Module):
     def __init__(self, num_hid):
         super(RawNet, self).__init__()
@@ -72,6 +97,7 @@ class RawNet(torch.nn.Module):
         self.input_size = 2
         self.output_size = 1
         # NN Layers
+        # Using 3 Linear Layers to initialize the rawNet
         self.layer1 = torch.nn.Linear(2,num_hid)
         self.layer2 = torch.nn.Linear(num_hid,num_hid)   
         self.layer3 = torch.nn.Linear(num_hid,1)
@@ -79,14 +105,17 @@ class RawNet(torch.nn.Module):
         self.sigmoid = torch.nn.Sigmoid()
 
         # rawNet Model
+        # model1 -----> layer1 and tanh
         self.model1_rawNet = torch.nn.Sequential(
             self.layer1,
             self.tanh
         )
+        # model2 -----> layer2 and tanh
         self.model2_rawNet = torch.nn.Sequential(
             self.layer2,
             self.tanh
         )
+        # model3 -----> layer3 and sigmoid
         self.model3_rawNet = torch.nn.Sequential(
             self.layer3,
             self.sigmoid
@@ -96,12 +125,18 @@ class RawNet(torch.nn.Module):
     def forward(self, input):
         # INSERT CODE HERE
         output_model1 = self.model1_rawNet(input)
+        # Get the answer of Q5
+        # This answer is for 2 middle layers situation
         self.h1 = output_model1
         output_model2 = self.model2_rawNet(output_model1)
+        # The second middle layer
         self.h2 = output_model2
         final_output = self.model3_rawNet(output_model2)
         
         # seconde way writing this code
+        # You can also write the code in this way
+        # This way is not good enough to do some changes
+
         # input = self.layer1(input)
         # input = self.tanh(input)
         # self.h1 = input
@@ -114,6 +149,9 @@ class RawNet(torch.nn.Module):
         # CHANGE CODE HERE
         return final_output
 
+# Using this method to check the number of middle layer the NN has
+# If number is 1 -----> polar
+# If number is 2 -----> rawNet
 def check_number_layer(net, layer):
     if(layer == 1):
         mid_layer = net.h1
@@ -140,9 +178,12 @@ def graph_hidden(net, layer, node):
         mid_layer_2_filtered = mid_layer[:,node]
         # Whether checking is because of the codomain of Tanh and sigmoid
         # we need to do the filting
+        # The tanh is from -1 to 1
+        # The sigmoid is from 0 to 1
+        # It is necessary to select the correct part by checking whether the value is larger than 0
         pred = (mid_layer_2_filtered >= 0).float()
 
         # plot function computed by model
-        # same come with graph_output
+        # same come with graph_output which is is spiral_main.py
         plt.clf()
         plt.pcolormesh(xrange,yrange,pred.cpu().view(yrange.size()[0],xrange.size()[0]), cmap='Wistia')
