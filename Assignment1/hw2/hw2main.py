@@ -85,58 +85,59 @@ def main():
                       % (epoch + 1, i + 1, runningLoss / 32))
                 runningLoss = 0
 
-    # Save model.
-    torch.save(net.state_dict(), 'savedModel.pth')
-    print("\n"
-          "Model saved to savedModel.pth")
+        # # Save model.
+        # torch.save(net.state_dict(), 'savedModel.pth')
+        # print("\n"
+        #     "Model saved to savedModel.pth")
 
-    # Test on validation data if it exists.
-    if student.trainValSplit != 1:
-        net.eval()
+        # Test on validation data if it exists.
+        if student.trainValSplit != 1:
+            net.eval()
 
-        correctRatingOnlySum = 0
-        correctCategoryOnlySum = 0
-        bothCorrectSum = 0
-        with torch.no_grad():
-            for batch in valLoader:
-                # Get a batch and potentially send it to GPU memory.
-                inputs = textField.vocab.vectors[batch.reviewText[0]].to(device)
-                length = batch.reviewText[1].to(device)
-                rating = batch.rating.to(device)
-                businessCategory = batch.businessCategory.to(device)
+            correctRatingOnlySum = 0
+            correctCategoryOnlySum = 0
+            bothCorrectSum = 0
+            with torch.no_grad():
+                for batch in valLoader:
+                    # Get a batch and potentially send it to GPU memory.
+                    inputs = textField.vocab.vectors[batch.reviewText[0]].to(device)
+                    length = batch.reviewText[1].to(device)
+                    rating = batch.rating.to(device)
+                    businessCategory = batch.businessCategory.to(device)
 
-                # Convert network output to integer values.
-                ratingOutputs, categoryOutputs = student.convertNetOutput(*net(inputs, length))
+                    # Convert network output to integer values.
+                    ratingOutputs, categoryOutputs = student.convertNetOutput(*net(inputs, length))
 
-                # Calculate performance
-                correctRating = rating == ratingOutputs.flatten()
-                correctCategory = businessCategory == categoryOutputs.flatten()
+                    # Calculate performance
+                    correctRating = rating == ratingOutputs.flatten()
+                    correctCategory = businessCategory == categoryOutputs.flatten()
 
-                correctRatingOnlySum += torch.sum(correctRating & ~correctCategory).item()
-                correctCategoryOnlySum += torch.sum(correctCategory & ~correctRating).item()
-                bothCorrectSum += torch.sum(correctRating & correctCategory).item()
+                    correctRatingOnlySum += torch.sum(correctRating & ~correctCategory).item()
+                    correctCategoryOnlySum += torch.sum(correctCategory & ~correctRating).item()
+                    bothCorrectSum += torch.sum(correctRating & correctCategory).item()
 
-        correctRatingOnlyPercent = correctRatingOnlySum / len(validate)
-        correctCategoryOnlyPercent = correctCategoryOnlySum / len(validate)
-        bothCorrectPercent = bothCorrectSum / len(validate)
-        neitherCorrectPer = 1 - correctRatingOnlyPercent \
-                              - correctCategoryOnlyPercent \
-                              - bothCorrectPercent
+            correctRatingOnlyPercent = correctRatingOnlySum / len(validate)
+            correctCategoryOnlyPercent = correctCategoryOnlySum / len(validate)
+            bothCorrectPercent = bothCorrectSum / len(validate)
+            neitherCorrectPer = 1 - correctRatingOnlyPercent \
+                                - correctCategoryOnlyPercent \
+                                - bothCorrectPercent
 
-        score = 100 * (bothCorrectPercent
-                       + 0.5 * correctCategoryOnlyPercent
-                       + 0.1 * correctRatingOnlyPercent)
+            score = 100 * (bothCorrectPercent
+                        + 0.5 * correctCategoryOnlyPercent
+                        + 0.1 * correctRatingOnlyPercent)
 
-        print("\n"
-              "Rating incorrect, business category incorrect: {:.2%}\n"
-              "Rating correct, business category incorrect: {:.2%}\n"
-              "Rating incorrect, business category correct: {:.2%}\n"
-              "Rating correct, business category correct: {:.2%}\n"
-              "\n"
-              "Weighted score: {:.2f}".format(neitherCorrectPer,
-                                              correctRatingOnlyPercent,
-                                              correctCategoryOnlyPercent,
-                                              bothCorrectPercent, score))
+            print("\n"
+                "Rating incorrect, business category incorrect: {:.2%}\n"
+                "Rating correct, business category incorrect: {:.2%}\n"
+                "Rating incorrect, business category correct: {:.2%}\n"
+                "Rating correct, business category correct: {:.2%}\n"
+                "\n"
+                "Weighted score: {:.2f}".format(neitherCorrectPer,
+                                                correctRatingOnlyPercent,
+                                                correctCategoryOnlyPercent,
+                                                bothCorrectPercent, score))
 
+            net.train()
 if __name__ == '__main__':
     main()

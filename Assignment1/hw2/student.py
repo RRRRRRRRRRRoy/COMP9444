@@ -19,12 +19,12 @@ You may change this variable in the config.py file.
 You may only use GloVe 6B word vectors as found in the torchtext package.
 """
 
-# import torch
+import torch
 import torch.nn as tnn
 import torch.optim as toptim
 from torchtext.vocab import GloVe
-# import numpy as np
-# import sklearn
+import numpy as np
+import sklearn
 
 from config import device
 
@@ -32,35 +32,27 @@ from config import device
 ##### The following determines the processing of input data (review text) ######
 ################################################################################
 
+
 def tokenise(sample):
-    """
-    Called before any processing of the text has occurred.
-    """
-
     processed = sample.split()
-
     return processed
 
-def preprocessing(sample):
-    """
-    Called after tokenising but before numericalising.
-    """
 
+def preprocessing(sample):
     return sample
 
-def postprocessing(batch, vocab):
-    """
-    Called after numericalising but before vectorising.
-    """
 
+def postprocessing(batch, vocab):
     return batch
 
+
 stopWords = {}
-wordVectors = GloVe(name='6B', dim=50)
+wordVectors = GloVe(name='6B', dim=300)
 
 ################################################################################
 ####### The following determines the processing of label data (ratings) ########
 ################################################################################
+
 
 def convertNetOutput(ratingOutput, categoryOutput):
     """
@@ -71,11 +63,12 @@ def convertNetOutput(ratingOutput, categoryOutput):
     outputs a different representation convert the output here.
     """
 
-    return ratingOutput, categoryOutput
+    return (ratingOutput > 0.5).int(), categoryOutput.argmax(dim=1)
 
 ################################################################################
 ###################### The following determines the model ######################
 ################################################################################
+
 
 class network(tnn.Module):
     """
@@ -88,9 +81,11 @@ class network(tnn.Module):
 
     def __init__(self):
         super(network, self).__init__()
+        pass
 
     def forward(self, input, length):
         pass
+
 
 class loss(tnn.Module):
     """
@@ -111,7 +106,8 @@ lossFunc = loss()
 ################## The following determines training options ###################
 ################################################################################
 
-trainValSplit = 0.8
+trainValSplit = 0.95
 batchSize = 32
 epochs = 10
-optimiser = toptim.SGD(net.parameters(), lr=0.01)
+# optimiser = toptim.Adam(net.parameters(), lr=0.01)
+optimiser = toptim.Adam(net.parameters(), lr=0.001)
