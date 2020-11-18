@@ -134,7 +134,7 @@ class network(tnn.Module):
 
         self.rate_output_layer = torch.nn.Sequential(
             self.fullconnection_rate_layer1,
-            self.sigmoid.squeeze()
+            self.sigmoid
         )
         self.category_output_layer = torch.nn.Sequential(
             self.fullconnection_category_encode,
@@ -168,8 +168,7 @@ class network(tnn.Module):
         category_last_hidden = category_last_hidden * rate_attention
         rate_last_hidden = rate_last_hidden * category_attention
 
-        rate_output = self.rate_output_layer(rate_last_hidden)
-        rate_output = rate_output.squeeze()
+        rate_output = self.rate_output_layer(rate_last_hidden).squeeze()
         
         category_output = self.category_output_layer(category_last_hidden)
 
