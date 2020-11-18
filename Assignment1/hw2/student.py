@@ -56,7 +56,9 @@ parameters_dict = {"dimension": 1,
                     "rate_Layer_numer":2,
                     "layer_input_size":75*2,
                     "encode_output_size":64,
-                    "category_Layer_numer":1}
+                    "category_Layer_numer":1,
+                    "rate_layer1_output":1,
+                    "category_Layer1_output":5}
 
 ################################################################################
 ####### The following determines the processing of label data (ratings) ########
@@ -99,7 +101,7 @@ class network(tnn.Module):
             parameters_dict["layer_input_size"], parameters_dict["layer_input_size"]
             )
         self.fullconnection_rate_layer1 = torch.nn.Linear(
-            parameters_dict["layer_input_size"], 1
+            parameters_dict["layer_input_size"], parameters_dict["rate_layer1_output"]
             )
 
 
@@ -113,7 +115,7 @@ class network(tnn.Module):
         self.fullconnection_category_attention = torch.nn.Linear(
             parameters_dict["layer_input_size"], parameters_dict["layer_input_size"])
         self.fullconnection_category_layer1 = torch.nn.Linear(
-            parameters_dict["encode_output_size"], 5)
+            parameters_dict["encode_output_size"], parameters_dict["category_Layer1_output"])
 
         # activation function
         self.relu = torch.nn.ReLU()
@@ -188,7 +190,8 @@ class loss(tnn.Module):
         rate_loss = self.rate_BCELoss(ratingOutput, ratingTarget)
         category_loss = self.category_NLLLoss(categoryOutput, categoryTarget)
 
-        return rate_loss + category_loss
+        total_loss = rate_loss + category_loss
+        return total_loss
 
 
 net = network()
