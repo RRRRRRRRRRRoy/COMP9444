@@ -71,7 +71,7 @@ def convertNetOutput(ratingOutput, categoryOutput):
     rating, and 0, 1, 2, 3, or 4 for the business category.  If your network
     outputs a different representation convert the output here.
     """
-    ratingoutput = (ratingOutput > 0.5).int()
+    ratingoutput = (ratingOutput > 0.5).long()
     categoryOutput =categoryOutput.argmax(dim=parameters_dict["dimension"])
     return ratingoutput , categoryOutput
 
@@ -123,6 +123,30 @@ class network(tnn.Module):
         self.sigmoid = torch.nn.Sigmoid()
         self.softmax = torch.nn.Softmax(dim=parameters_dict["dimension"])
 
+        self.rate_attention_layer = torch.nn.Sequential(
+            self.fullconnection_rate_attention
+            self.sigmoid
+        )
+        self.category_attention_layer = torch.nn.Sequential(
+            self.fullconnection_category_attention
+            self.sigmoid
+        )
+
+        self.rate_output_layer = torch.nn.Sequential(
+            self.fullconnection_rate_layer1
+            self.sigmoid.squeeze()
+        )
+        self.category_output_layer = torch.nn.Sequential(
+            self.fullconnection_category_encode
+            self.relu
+            self.fullconnection_category_layer1
+            self.softmax
+        )
+
+
+    def get_last_hidden(hidden_part):
+        
+    )
     def forward(self, input, length):
         pass
 
