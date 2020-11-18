@@ -166,8 +166,13 @@ class network(tnn.Module):
         category_last_hidden = category_last_hidden * rate_attention
         rate_last_hidden = rate_last_hidden * category_attention
 
+        rate_output = self.rate_output_layer(rate_last_hidden)
+        rate_output = rate_output.squeeze()
+        
+        category_output = self.category_output_layer(category_last_hidden)
 
-
+        return rate_output, category_output
+        
 class loss(tnn.Module):
     """
     Class for creating the loss function.  The labels and outputs from your
