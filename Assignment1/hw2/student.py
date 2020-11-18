@@ -205,4 +205,4 @@ trainValSplit = 0.95
 batchSize = 32
 epochs = 10
 # optimiser = toptim.Adam(net.parameters(), lr=0.01)
-optimiser = toptim.Adam(net.parameters(), lr=0.001)
+optimiser = toptim.SGD(net.parameters(), lr=0.001)
