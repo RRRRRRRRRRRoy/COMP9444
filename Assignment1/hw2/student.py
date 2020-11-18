@@ -102,9 +102,10 @@ class network(tnn.Module):
             )
         self.fullconnection_rate_layer1 = torch.nn.Linear(
             parameters_dict["layer_input_size"], parameters_dict["rate_layer1_output"]
-            )
+        )
 
 
+        
         self.lstm_category = torch.nn.LSTM(
             parameters_dict["input_size"], parameters_dict["hidden_size"], num_layers=parameters_dict["category_Layer_numer"], 
             batch_first=True, bidirectional=True, dropout=parameters_dict["dropout"]
@@ -123,6 +124,9 @@ class network(tnn.Module):
         self.sigmoid = torch.nn.Sigmoid()
         self.softmax = torch.nn.Softmax(dim=parameters_dict["dimension"])
 
+        # Try to put these layers together
+        # Using the attention method needs to find the middle part
+        # Therefore using nn.Sequential to separate them
         self.rate_attention_layer = torch.nn.Sequential(
             self.fullconnection_rate_attention,
             self.sigmoid
@@ -144,35 +148,44 @@ class network(tnn.Module):
         )
 
 
-    def get_last_hidden(input_data,lstm_function):
-        output, (hidden, C) = lstm_function(input_data)
-        hidden_part1 = hidden[-2, :, :]
-        hidden_part2 = hidden[-1, :, :]
-        last_hidden = torch.cat(
-            [hidden_part1, hidden_part2], dim=parameters_dict["dimension"]
-            )
-        return last_hidden
-
     def forward(self, input, length):
         input_data = torch.nn.utils.rnn.pack_padded_sequence(
             input, length, batch_first=True
         )
+        #output, (hn, cn) = rnn(input, (h0, c0))
 
-        rate_last_hidden = self.get_last_hidden(input_data,self.lstm_rate)
-        category_last_hidden = self.get_last_hidden(input_data,self.self.lstm_category)
+        # The LSTM return by torch
+        # Here is the sample: output, (hn, cn) = rnn(input, (h0, c0))
+        # Source: https://pytorch.org/docs/stable/generated/torch.nn.LSTM.html?highlight=lstm#torch.nn.LSTM
+        category_o, (category_h, category_c) = self.lstm_category(input_data)
+        category_h_part1 = category_h[-2, :, :]
+        category_h_part2 = category_h[-1, :, :]
+        category_last_hidden = torch.cat(
+            [category_h_part1, category_h_part2], dim=parameters_dict["dimension"]
+        )
 
-        # https://stackoverflow.com/questions/51817479/vscode-please-clean-your-repository-working-tree-before-checkout
+        rate_o, (rate_h, rate_c) = self.lstm_rate(input_data)
+        rate_h_part1 = rate_h[-2, :, :]
+        rate_h_part2 = rate_h[-1, :, :]
+        rate_last_hidden = torch.cat(
+            [rate_h_part1, rate_h_part2], dim=parameters_dict["dimension"]
+            )
+
+        # Here is the sample code and introduction about using attention to increase the accuracy
+        # Source1: https://stackoverflow.com/questions/51817479/vscode-please-clean-your-repository-working-tree-before-checkout
+        # Source2: https://medium.com/intel-student-ambassadors/implementing-attention-models-in-pytorch-f947034b3e66
         rate_attention = self.rate_attention_layer(rate_last_hidden)
         category_attention = self.category_attention_layer(category_last_hidden)
 
         category_last_hidden = category_last_hidden * rate_attention
         rate_last_hidden = rate_last_hidden * category_attention
 
-        rate_output = self.rate_output_layer(rate_last_hidden).squeeze()
-        
+        rate_output = self.rate_output_layer(rate_last_hidden)
+        rate_output = rate_output.squeeze()
         category_output = self.category_output_layer(category_last_hidden)
 
         return rate_output, category_output
+
 
 class loss(tnn.Module):
     """
@@ -182,8 +195,8 @@ class loss(tnn.Module):
 
     def __init__(self):
         super(loss, self).__init__()
-        self.rate_BCELoss = torch.nn.BCELoss()
-        self.category_NLLLoss = torch.nn.NLLLoss()
+        self.rate_BCELoss = tnn.BCELoss()
+        self.category_NLLLoss = tnn.NLLLoss()
 
     def forward(self, ratingOutput, categoryOutput, ratingTarget, categoryTarget):
         ratingTarget = ratingTarget.float()
@@ -191,8 +204,8 @@ class loss(tnn.Module):
         rate_loss = self.rate_BCELoss(ratingOutput, ratingTarget)
         category_loss = self.category_NLLLoss(categoryOutput, categoryTarget)
 
-        total_loss = rate_loss + category_loss
-        return total_loss
+        return rate_loss + category_loss
+
 
 
 net = network()
@@ -205,5 +218,5 @@ lossFunc = loss()
 trainValSplit = 0.95
 batchSize = 32
 epochs = 10
-# optimiser = toptim.Adam(net.parameters(), lr=0.01)
-optimiser = toptim.SGD(net.parameters(), lr=0.001)
+optimiser = toptim.Adam(net.parameters(), lr=0.01)
+# optimiser = toptim.SGD(net.parameters(), lr=0.0000001)
