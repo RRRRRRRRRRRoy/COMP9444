@@ -106,7 +106,7 @@ class network(tnn.Module):
 
 
         self.lstm_category = torch.nn.LSTM(
-            parameters_dict["input_size"], parameters_dict["hidden_size"], num_layers=num_layers=parameters_dict["category_Layer_numer"], 
+            parameters_dict["input_size"], parameters_dict["hidden_size"], num_layers=parameters_dict["category_Layer_numer"], 
             batch_first=True, bidirectional=True, dropout=parameters_dict["dropout"]
         )
         self.fullconnection_category_encode = torch.nn.Linear(
@@ -124,22 +124,22 @@ class network(tnn.Module):
         self.softmax = torch.nn.Softmax(dim=parameters_dict["dimension"])
 
         self.rate_attention_layer = torch.nn.Sequential(
-            self.fullconnection_rate_attention
+            self.fullconnection_rate_attention,
             self.sigmoid
         )
         self.category_attention_layer = torch.nn.Sequential(
-            self.fullconnection_category_attention
+            self.fullconnection_category_attention,
             self.sigmoid
         )
 
         self.rate_output_layer = torch.nn.Sequential(
-            self.fullconnection_rate_layer1
+            self.fullconnection_rate_layer1,
             self.sigmoid.squeeze()
         )
         self.category_output_layer = torch.nn.Sequential(
-            self.fullconnection_category_encode
-            self.relu
-            self.fullconnection_category_layer1
+            self.fullconnection_category_encode,
+            self.relu,
+            self.fullconnection_category_layer1,
             self.softmax
         )
 
