@@ -144,9 +144,13 @@ class network(tnn.Module):
         )
 
 
-    def get_last_hidden(hidden_part):
+    def get_last_hidden(input_data,self.lstm):
+        output, (hidden, C) = self.lstm_rate(input_data)
+        last_hidden = torch.cat(
+            [hidden[-2, :, :], hidden[-1, :, :]], dim=parameters_dict["dimension"]
+            )
+        return last_hidden
         
-    )
     def forward(self, input, length):
         pass
 
