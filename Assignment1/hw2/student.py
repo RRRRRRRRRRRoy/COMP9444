@@ -144,15 +144,28 @@ class network(tnn.Module):
         )
 
 
-    def get_last_hidden(input_data,self.lstm):
-        output, (hidden, C) = self.lstm_rate(input_data)
+    def get_last_hidden(input_data,lstm_function:
+        output, (hidden, C) = lstm_function(input_data)
         last_hidden = torch.cat(
             [hidden[-2, :, :], hidden[-1, :, :]], dim=parameters_dict["dimension"]
             )
         return last_hidden
-        
+
     def forward(self, input, length):
-        pass
+        input_data = torch.nn.utils.rnn.pack_padded_sequence(
+            input, length, batch_first=True
+        )
+
+        rate_last_hidden = self.get_last_hidden(input_data,self.lstm_rate)
+        category_last_hidden = self.get_last_hidden(input_data,self.self.lstm_category)
+
+        # https://stackoverflow.com/questions/51817479/vscode-please-clean-your-repository-working-tree-before-checkout
+        rate_attention = self.rate_attention_layer(rate_last_hidden)
+        category_attention = self.category_attention_layer(category_last_hidden)
+
+        category_last_hidden = category_last_hidden * rate_attention
+        rate_last_hidden = rate_last_hidden * category_attention
+
 
 
 class loss(tnn.Module):
