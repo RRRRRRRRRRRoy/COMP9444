@@ -19,6 +19,39 @@ You may change this variable in the config.py file.
 You may only use GloVe 6B word vectors as found in the torchtext package.
 """
 
+"""
+
+###############################################################################
+##### Model Reviews(The Answer of the question in the assignment2 pdf): ######
+###############################################################################
+
+Firstly, doing the emotion analysis is similar to text categorization task. 
+In other words, these two tasks are parallel. This is because in these two
+tasks, we also use the LSTM to do the feature extraction. After getting the
+features, we also use the artificial neural network to categorize.
+After programming, we can find the result of the emotion analysis is nearly 90%
+To increase the performance of the model, we also use the features which is provided
+by the previous classification task to calculate the attention map. You can also
+find this part in the code with the Source from the Internet. In our model, consider the
+emotion analysis task, this model predict the probability whether it is a positive sample.
+Furthermore, as for classification task, this model can provide the probability of 
+the category each output belongs to.
+
+In my program, I try to set the parameter as 64 instead of 56. This is because the result
+provided by 64 is better than 56. In the optimizer, I chose to use Adam and set the learning
+rate as the default which is 0.01. Also, I would like to set all these parameters into a same dict
+and also put the layer together by using torch.nn.Sequential function. This can help me reduce the time 
+to find and change the parameters
+
+Also, consider the optimizer in this model, we can choose both Adam and SGD.
+If you have a gpu which supports CUDA, you can choose SGD. If not, you can use
+Adam instead. A most interesting point should be postes here, when using SGD, if the learning 
+rate you set is not good, your loss result will keep positive and hard to converge.
+In this situation, the loss will in the range from 0.490 - 0.495. Also, the weighted score is 
+nearly 22(less eaual than 22). Also, an inappropriate batch size can also cause the overfitting.
+These are what we should pay more attention in this assignment.
+"""
+
 import torch
 import torch.nn as tnn
 import torch.optim as toptim
@@ -73,8 +106,10 @@ def convertNetOutput(ratingOutput, categoryOutput):
     rating, and 0, 1, 2, 3, or 4 for the business category.  If your network
     outputs a different representation convert the output here.
     """
+    # Attention: If you are using Torch 1.6 you can use tensor.int()
+    # But if you use torch 1.2 plz change it to long(avoiding type error)
     ratingoutput = (ratingOutput > 0.5).long()
-    categoryOutput =categoryOutput.argmax(dim=parameters_dict["dimension"])
+    categoryOutput = categoryOutput.argmax(dim=parameters_dict["dimension"])
     return ratingoutput , categoryOutput
 
 ################################################################################
@@ -93,6 +128,7 @@ class network(tnn.Module):
 
     def __init__(self):
         super(network, self).__init__()
+        # These part is for rating analysis
         self.lstm_rate = torch.nn.LSTM(
             parameters_dict["input_size"], parameters_dict["hidden_size"], num_layers=parameters_dict["rate_Layer_numer"], 
             batch_first=True, bidirectional=True, dropout=parameters_dict["dropout"]
@@ -105,7 +141,7 @@ class network(tnn.Module):
         )
 
 
-        
+        # This part is for the output categorize
         self.lstm_category = torch.nn.LSTM(
             parameters_dict["input_size"], parameters_dict["hidden_size"], num_layers=parameters_dict["category_Layer_numer"], 
             batch_first=True, bidirectional=True, dropout=parameters_dict["dropout"]
@@ -127,6 +163,7 @@ class network(tnn.Module):
         # Try to put these layers together
         # Using the attention method needs to find the middle part
         # Therefore using nn.Sequential to separate them
+        # Source: https://stackoverflow.com/questions/63914843/layernorm-inside-nn-sequential-in-torch
         self.rate_attention_layer = torch.nn.Sequential(
             self.fullconnection_rate_attention,
             self.sigmoid
@@ -152,25 +189,35 @@ class network(tnn.Module):
         input_data = torch.nn.utils.rnn.pack_padded_sequence(
             input, length, batch_first=True
         )
-        #output, (hn, cn) = rnn(input, (h0, c0))
-
         # The LSTM return by torch
         # Here is the sample: output, (hn, cn) = rnn(input, (h0, c0))
         # Source: https://pytorch.org/docs/stable/generated/torch.nn.LSTM.html?highlight=lstm#torch.nn.LSTM
-        category_o, (category_h, category_c) = self.lstm_category(input_data)
-        category_h_part1 = category_h[-2, :, :]
-        category_h_part2 = category_h[-1, :, :]
-        category_last_hidden = torch.cat(
-            [category_h_part1, category_h_part2], dim=parameters_dict["dimension"]
+        
+        # For rate
+        rate_o, (rate_h, rate_c) = self.lstm_rate(input_data)
+        # slice method
+        # Using cat can connect 2 tensors
+        # Source: https://pytorch.org/docs/stable/generated/torch.cat.html
+
+        # Here is the BiLSTM
+        # Source: https://towardsdatascience.com/understanding-bidirectional-rnn-in-pytorch-5bd25a5dd66
+        rate_last_hidden = torch.cat(
+            [rate_h[-2, :, :], rate_h[-1, :, :]], dim=parameters_dict["dimension"]
         )
 
-        rate_o, (rate_h, rate_c) = self.lstm_rate(input_data)
-        rate_h_part1 = rate_h[-2, :, :]
-        rate_h_part2 = rate_h[-1, :, :]
-        rate_last_hidden = torch.cat(
-            [rate_h_part1, rate_h_part2], dim=parameters_dict["dimension"]
-            )
+        # For category
+        category_o, (category_h, category_c) = self.lstm_category(input_data)
+        # slice method
+        # Using cat can connect 2 tensors
+        # Source: https://pytorch.org/docs/stable/generated/torch.cat.html
+        
+        # Here is the BiLSTM
+        # Source: https://towardsdatascience.com/understanding-bidirectional-rnn-in-pytorch-5bd25a5dd66
+        category_last_hidden = torch.cat(
+            [category_h[-2, :, :], category_h[-1, :, :]], dim=parameters_dict["dimension"]
+        )
 
+        # Attention Map part which is to increase the accuracy
         # Here is the sample code and introduction about using attention to increase the accuracy
         # Source1: https://stackoverflow.com/questions/51817479/vscode-please-clean-your-repository-working-tree-before-checkout
         # Source2: https://medium.com/intel-student-ambassadors/implementing-attention-models-in-pytorch-f947034b3e66
@@ -195,16 +242,20 @@ class loss(tnn.Module):
 
     def __init__(self):
         super(loss, self).__init__()
+        # How to use BCELoss
+        # Source: https://discuss.pytorch.org/t/unclear-about-weighted-bce-loss/21486
         self.rate_BCELoss = tnn.BCELoss()
+        # How to use NLLLoss
+        # Source: https://discuss.pytorch.org/t/understanding-nllloss-function/23702
         self.category_NLLLoss = tnn.NLLLoss()
 
     def forward(self, ratingOutput, categoryOutput, ratingTarget, categoryTarget):
         ratingTarget = ratingTarget.float()
 
-        rate_loss = self.rate_BCELoss(ratingOutput, ratingTarget)
-        category_loss = self.category_NLLLoss(categoryOutput, categoryTarget)
+        # rate_loss = self.rate_BCELoss(ratingOutput, ratingTarget)
+        # category_loss = self.category_NLLLoss(categoryOutput, categoryTarget)
 
-        return rate_loss + category_loss
+        return self.rate_BCELoss(ratingOutput, ratingTarget) + self.category_NLLLoss(categoryOutput, categoryTarget)
 
 
 
@@ -215,8 +266,19 @@ lossFunc = loss()
 ################## The following determines training options ###################
 ################################################################################
 
+# When you find the best model change this parameter as 1
+# This means using all these data to train this model
 trainValSplit = 0.95
+
+# The larger batchsize the slower speed of training.
+# Sometimes it can reduce the overfitting problem.
+# Attention: If you set this value too large, your the memory of graphics card will overflow
 batchSize = 32
+
+# Set up epochs based on your PC
 epochs = 10
-optimiser = toptim.Adam(net.parameters(), lr=0.01)
+
+# optimiser = toptim.Adam(net.parameters(), lr=0.01)
 # optimiser = toptim.SGD(net.parameters(), lr=0.0000001)
+optimiser = toptim.Adam(net.parameters(), lr=0.001
+)
