@@ -144,7 +144,7 @@ class network(tnn.Module):
         )
 
 
-    def get_last_hidden(input_data,lstm_function:
+    def get_last_hidden(input_data,lstm_function):
         output, (hidden, C) = lstm_function(input_data)
         hidden_part1 = hidden[-2, :, :]
         hidden_part2 = hidden[-1, :, :]
