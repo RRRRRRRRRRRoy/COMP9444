@@ -50,8 +50,12 @@ def postprocessing(batch, vocab):
 stopWords = {}
 wordVectors = GloVe(name='6B', dim=300)
 parameters_dict = {"dimension": 1, 
-                    "Dropout":0.5, 
+                    "dropout":0.5, 
+                    "input_size":300,
+                    "hidden_size":75,
                     "rate_Layer_numer":2,
+                    "layer_input_size":75*2,
+                    "encode_output_size":64,
                     "category_Layer_numer":1}
 
 ################################################################################
@@ -88,26 +92,36 @@ class network(tnn.Module):
     def __init__(self):
         super(network, self).__init__()
         self.lstm_rate = torch.nn.LSTM(
-            300, 75, num_layers=parameters_dict["rate_Layer_numer"], 
-            batch_first=True, bidirectional=True, dropout=parameters_dict["Dropout"]
+            parameters_dict["input_size"], parameters_dict["hidden_size"], num_layers=parameters_dict["rate_Layer_numer"], 
+            batch_first=True, bidirectional=True, dropout=parameters_dict["dropout"]
         )
-        self.fullconnection_rate_attention = torch.nn.Linear(75 * 2, 75 * 2)
-        self.fullconnection_rate_layer1 = torch.nn.Linear(75 * 2, 1)
+        self.fullconnection_rate_attention = torch.nn.Linear(
+            parameters_dict["layer_input_size"], parameters_dict["layer_input_size"]
+            )
+        self.fullconnection_rate_layer1 = torch.nn.Linear(
+            parameters_dict["layer_input_size"], 1
+            )
+
+
+
 
         self.lstm_category = torch.nn.LSTM(
-            300, 75, num_layers=num_layers=parameters_dict["category_Layer_numer"], 
-            batch_first=True, bidirectional=True, dropout=parameters_dict["Dropout"]
+            parameters_dict["input_size"], parameters_dict["hidden_size"], num_layers=num_layers=parameters_dict["category_Layer_numer"], 
+            batch_first=True, bidirectional=True, dropout=parameters_dict["dropout"]
         )
-        self.fullconnection_category_encode = torch.nn.Linear(75 * 2, 64)
+        self.fullconnection_category_encode = torch.nn.Linear(
+            parameters_dict["layer_input_size"], parameters_dict["encode_output_size"]
+        )
         self.fullconnection_category_attention = torch.nn.Linear(
-            75 * 2, 75 * 2)
-        self.fullconnection_category_layer1 = torch.nn.Linear(64, 5)
+            parameters_dict["layer_input_size"], parameters_dict["layer_input_size"])
+        self.fullconnection_category_layer1 = torch.nn.Linear(
+            parameters_dict["encode_output_size"], 5)
 
         # activation function
         self.relu = torch.nn.ReLU()
-        self.dropout = torch.nn.Dropout(0.5)
+        self.dropout = torch.nn.Dropout(parameters_dict["dropout"])
         self.sigmoid = torch.nn.Sigmoid()
-        self.softmax = torch.nn.Softmax(dim=dimension)
+        self.softmax = torch.nn.Softmax(dim=parameters_dict["dimension"])
 
     def forward(self, input, length):
         pass
