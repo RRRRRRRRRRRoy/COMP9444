@@ -103,8 +103,6 @@ class network(tnn.Module):
             )
 
 
-
-
         self.lstm_category = torch.nn.LSTM(
             parameters_dict["input_size"], parameters_dict["hidden_size"], num_layers=num_layers=parameters_dict["category_Layer_numer"], 
             batch_first=True, bidirectional=True, dropout=parameters_dict["dropout"]
@@ -172,7 +170,7 @@ class network(tnn.Module):
         category_output = self.category_output_layer(category_last_hidden)
 
         return rate_output, category_output
-        
+
 class loss(tnn.Module):
     """
     Class for creating the loss function.  The labels and outputs from your
@@ -181,9 +179,16 @@ class loss(tnn.Module):
 
     def __init__(self):
         super(loss, self).__init__()
+        self.rate_BCELoss = tnn.BCELoss()
+        self.category_NLLLoss = tnn.NLLLoss()
 
     def forward(self, ratingOutput, categoryOutput, ratingTarget, categoryTarget):
-        pass
+        ratingTarget = ratingTarget.float()
+
+        rate_loss = self.rate_BCELoss(ratingOutput, ratingTarget)
+        category_loss = self.category_NLLLoss(categoryOutput, categoryTarget)
+
+        return rate_loss + category_loss
 
 
 net = network()
