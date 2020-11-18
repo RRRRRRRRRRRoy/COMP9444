@@ -46,8 +46,13 @@ def postprocessing(batch, vocab):
     return batch
 
 
+# this dimension should be set as 300
 stopWords = {}
 wordVectors = GloVe(name='6B', dim=300)
+parameters_dict = {"dimension": 1, 
+                    "Dropout":0.5, 
+                    "rate_Layer_numer":2,
+                    "category_Layer_numer":1}
 
 ################################################################################
 ####### The following determines the processing of label data (ratings) ########
@@ -62,8 +67,9 @@ def convertNetOutput(ratingOutput, categoryOutput):
     rating, and 0, 1, 2, 3, or 4 for the business category.  If your network
     outputs a different representation convert the output here.
     """
-
-    return (ratingOutput > 0.5).int(), categoryOutput.argmax(dim=1)
+    ratingoutput = (ratingOutput > 0.5).int()
+    categoryOutput =categoryOutput.argmax(dim=parameters_dict["dimension"])
+    return ratingoutput , categoryOutput
 
 ################################################################################
 ###################### The following determines the model ######################
@@ -81,7 +87,27 @@ class network(tnn.Module):
 
     def __init__(self):
         super(network, self).__init__()
-        pass
+        self.lstm_rate = torch.nn.LSTM(
+            300, 75, num_layers=parameters_dict["rate_Layer_numer"], 
+            batch_first=True, bidirectional=True, dropout=parameters_dict["Dropout"]
+        )
+        self.fullconnection_rate_attention = torch.nn.Linear(75 * 2, 75 * 2)
+        self.fullconnection_rate_layer1 = torch.nn.Linear(75 * 2, 1)
+
+        self.lstm_category = torch.nn.LSTM(
+            300, 75, num_layers=num_layers=parameters_dict["category_Layer_numer"], 
+            batch_first=True, bidirectional=True, dropout=parameters_dict["Dropout"]
+        )
+        self.fullconnection_category_encode = torch.nn.Linear(75 * 2, 64)
+        self.fullconnection_category_attention = torch.nn.Linear(
+            75 * 2, 75 * 2)
+        self.fullconnection_category_layer1 = torch.nn.Linear(64, 5)
+
+        # activation function
+        self.relu = torch.nn.ReLU()
+        self.dropout = torch.nn.Dropout(0.5)
+        self.sigmoid = torch.nn.Sigmoid()
+        self.softmax = torch.nn.Softmax(dim=dimension)
 
     def forward(self, input, length):
         pass
@@ -98,6 +124,7 @@ class loss(tnn.Module):
 
     def forward(self, ratingOutput, categoryOutput, ratingTarget, categoryTarget):
         pass
+
 
 net = network()
 lossFunc = loss()
