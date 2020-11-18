@@ -41,10 +41,8 @@ In my program, I try to set the parameter as 64 instead of 56. This is because t
 provided by 64 is better than 56. In the optimizer, I chose to use Adam and set the learning
 rate as the default which is 0.01. Also, I would like to set all these parameters into a same dict
 and also put the layer together by using torch.nn.Sequential function. This can help me reduce the time 
-to find and change the parameters
-
-Also, consider the optimizer in this model, we can choose both Adam and SGD.
-If you have a gpu which supports CUDA, you can choose SGD. If not, you can use
+to find and change the parametersAlso, consider the optimizer in this model, we can choose 
+both Adam and SGD. If you have a gpu which supports CUDA, you can choose SGD. If not, you can use
 Adam instead. A most interesting point should be postes here, when using SGD, if the learning 
 rate you set is not good, your loss result will keep positive and hard to converge.
 In this situation, the loss will in the range from 0.490 - 0.495. Also, the weighted score is 
@@ -135,7 +133,7 @@ class network(tnn.Module):
         )
         self.fullconnection_rate_attention = torch.nn.Linear(
             parameters_dict["layer_input_size"], parameters_dict["layer_input_size"]
-            )
+        )
         self.fullconnection_rate_layer1 = torch.nn.Linear(
             parameters_dict["layer_input_size"], parameters_dict["rate_layer1_output"]
         )
@@ -150,9 +148,11 @@ class network(tnn.Module):
             parameters_dict["layer_input_size"], parameters_dict["encode_output_size"]
         )
         self.fullconnection_category_attention = torch.nn.Linear(
-            parameters_dict["layer_input_size"], parameters_dict["layer_input_size"])
+            parameters_dict["layer_input_size"], parameters_dict["layer_input_size"]
+        )
         self.fullconnection_category_layer1 = torch.nn.Linear(
-            parameters_dict["encode_output_size"], parameters_dict["category_Layer1_output"])
+            parameters_dict["encode_output_size"], parameters_dict["category_Layer1_output"]
+        )
 
         # activation function
         self.relu = torch.nn.ReLU()
@@ -168,6 +168,7 @@ class network(tnn.Module):
             self.fullconnection_rate_attention,
             self.sigmoid
         )
+        
         self.category_attention_layer = torch.nn.Sequential(
             self.fullconnection_category_attention,
             self.sigmoid
@@ -177,6 +178,7 @@ class network(tnn.Module):
             self.fullconnection_rate_layer1,
             self.sigmoid
         )
+
         self.category_output_layer = torch.nn.Sequential(
             self.fullconnection_category_encode,
             self.relu,
@@ -193,28 +195,34 @@ class network(tnn.Module):
         # Here is the sample: output, (hn, cn) = rnn(input, (h0, c0))
         # Source: https://pytorch.org/docs/stable/generated/torch.nn.LSTM.html?highlight=lstm#torch.nn.LSTM
         
-        # For rate
+        # For rating prediction
         rate_o, (rate_h, rate_c) = self.lstm_rate(input_data)
         # slice method
         # Using cat can connect 2 tensors
         # Source: https://pytorch.org/docs/stable/generated/torch.cat.html
 
         # Here is the BiLSTM
+        # BiLSTM ----> Slice function
         # Source: https://towardsdatascience.com/understanding-bidirectional-rnn-in-pytorch-5bd25a5dd66
+        rate_h_part1 = rate_h[-2, :, :]
+        rate_h_part2 = rate_h[-1, :, :]
         rate_last_hidden = torch.cat(
-            [rate_h[-2, :, :], rate_h[-1, :, :]], dim=parameters_dict["dimension"]
+            [rate_h_part1, rate_h_part2], dim=parameters_dict["dimension"]
         )
 
-        # For category
+        # For output categorize
         category_o, (category_h, category_c) = self.lstm_category(input_data)
         # slice method
         # Using cat can connect 2 tensors
         # Source: https://pytorch.org/docs/stable/generated/torch.cat.html
         
         # Here is the BiLSTM
+        # BiLSTM ----> Slice function
         # Source: https://towardsdatascience.com/understanding-bidirectional-rnn-in-pytorch-5bd25a5dd66
+        category_h_part1 = category_h[-2, :, :]
+        category_h_part2 = category_h[-1, :, :]
         category_last_hidden = torch.cat(
-            [category_h[-2, :, :], category_h[-1, :, :]], dim=parameters_dict["dimension"]
+            [category_h_part1, category_h_part2], dim=parameters_dict["dimension"]
         )
 
         # Attention Map part which is to increase the accuracy
@@ -252,10 +260,10 @@ class loss(tnn.Module):
     def forward(self, ratingOutput, categoryOutput, ratingTarget, categoryTarget):
         ratingTarget = ratingTarget.float()
 
-        # rate_loss = self.rate_BCELoss(ratingOutput, ratingTarget)
-        # category_loss = self.category_NLLLoss(categoryOutput, categoryTarget)
+        rate_loss = self.rate_BCELoss(ratingOutput, ratingTarget)
+        category_loss = self.category_NLLLoss(categoryOutput, categoryTarget)
 
-        return self.rate_BCELoss(ratingOutput, ratingTarget) + self.category_NLLLoss(categoryOutput, categoryTarget)
+        return category_loss + rate_loss
 
 
 
@@ -280,5 +288,5 @@ epochs = 10
 
 # optimiser = toptim.Adam(net.parameters(), lr=0.01)
 # optimiser = toptim.SGD(net.parameters(), lr=0.0000001)
-optimiser = toptim.Adam(net.parameters(), lr=0.001
-)
+learning_rate = 0.001
+optimiser = toptim.Adam(net.parameters(), lr=learning_rate)
