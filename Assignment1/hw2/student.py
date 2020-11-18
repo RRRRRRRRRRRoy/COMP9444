@@ -183,8 +183,8 @@ class loss(tnn.Module):
 
     def __init__(self):
         super(loss, self).__init__()
-        self.rate_BCELoss = tnn.BCELoss()
-        self.category_NLLLoss = tnn.NLLLoss()
+        self.rate_BCELoss = torch.nn.BCELoss()
+        self.category_NLLLoss = torch.nn.NLLLoss()
 
     def forward(self, ratingOutput, categoryOutput, ratingTarget, categoryTarget):
         ratingTarget = ratingTarget.float()
