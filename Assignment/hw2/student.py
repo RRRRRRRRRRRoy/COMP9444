@@ -24,13 +24,16 @@ You may only use GloVe 6B word vectors as found in the torchtext package.
 ###############################################################################
 ##### Model Reviews(The Answer of the question in the assignment2 pdf): ######
 ###############################################################################
+#########  This is a individual task for me. Not a Group one   ################
+###############################################################################
+Here are the answers of questions which are mentioned in the assignment. 
 
 Firstly, doing the emotion analysis is similar to text categorization task. 
 In other words, these two tasks are parallel. This is because in these two
-tasks, we also use the LSTM to do the feature extraction. After getting the
+tasks, we use the LSTM to do the feature extraction. After getting the
 features, we also use the artificial neural network to categorize.
 After programming, we can find the result of the emotion analysis is nearly 90%
-To increase the performance of the model, we also use the features which is provided
+To increase the performance of the model, we also use features which is provided
 by the previous classification task to calculate the attention map. You can also
 find this part in the code with the Source from the Internet. In our model, consider the
 emotion analysis task, this model predict the probability whether it is a positive sample.
@@ -39,15 +42,17 @@ the category each output belongs to.
 
 In my program, I try to set the parameter as 64 instead of 56. This is because the result
 provided by 64 is better than 56. In the optimizer, I chose to use Adam and set the learning
-rate as the default which is 0.01. Also, I would like to set all these parameters into a same dict
-and also put the layer together by using torch.nn.Sequential function. This can help me reduce the time 
-to find and change the parametersAlso, consider the optimizer in this model, we can choose 
-both Adam and SGD. If you have a gpu which supports CUDA, you can choose SGD. If not, you can use
-Adam instead. A most interesting point should be postes here, when using SGD, if the learning 
+rate as 0.001. In this kind of situation, the socre weight is 82.95 Also, I would like to 
+set all these parameters into a same dictionary and also put the layer together by using torch.nn.Sequential 
+function. This can help me reduce the time to find and change the parameters. Also, consider the optimizer 
+in this model, we can choose both Adam and SGD. If you have a gpu which supports CUDA, you can choose SGD. 
+If not, you can use Adam instead. A most interesting point should be posted here, when using SGD, if the learning 
 rate you set is not good, your loss result will keep positive and hard to converge.
-In this situation, the loss will in the range from 0.490 - 0.495. Also, the weighted score is 
-nearly 22(less eaual than 22). Also, an inappropriate batch size can also cause the overfitting.
-These are what we should pay more attention in this assignment.
+In this situation, the loss value will in the range from 0.490 - 0.495. Also, the weighted score is 
+nearly 22(less eaual than 22). Another point which should be mentioned, an inappropriate batch size can 
+also cause the overfitting.These things are what we should pay more attention in this assignment.
+
+Tips: Sorry, I forget to use the tnn instead of torch.nn
 """
 
 import torch
